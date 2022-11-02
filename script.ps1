@@ -1,7 +1,7 @@
 $param1 = $args[0]
 $testing = $args[1]
 # $workingDirectory = <Path to working directory>
-$workingDirectory = $param1 -eq "-d" ? $pwd : "C:\Users\aaron\Desktop"
+$workingDirectory = $param1 -eq "-d" ? $pwd : "yeah"
 $checker = $false
 
 function Get-ScreenCapture([int]$Wait, [string]$FileType) {
@@ -9,7 +9,6 @@ function Get-ScreenCapture([int]$Wait, [string]$FileType) {
     $File = ""
     for ($i = 0; $i -lt 10000; $i++) {
         $path = Test-Path -Path "$workingDirectory\$FileType-$i.bmp"
-        write-host "yuh" + "$path"
         if(-Not $path) {
             $File = "$workingDirectory\$FileType-$i.bmp"
             break
@@ -52,25 +51,29 @@ $checker = $false
 Read-Host -Prompt "Loaded?"
 Get-ScreenCapture -Wait 0 -FileType "resmon"
 
-try {
-    Invoke-WebRequest -Uri "http://download.sysinternals.com/files/Autoruns.zip" -OutFile "$workingDirectory\Autoruns.zip"
-    Write-Host "worked"
-}
-catch {
-    Write-Host "Error downloading Autoruns64.exe"
+if(-Not (Test-Path "$workingDirectory\Autoruns.zip")) {
+    try {
+        Invoke-WebRequest -Uri "http://download.sysinternals.com/files/Autoruns.zip" -OutFile "$workingDirectory\Autoruns.zip"
+        Write-Host "worked"
+    }
+    catch {
+        Write-Host "Error downloading Autoruns64.exe"
+    }
 }
 
 $checker = $false
-while ($checker -eq $false) {
-    try {
-        Expand-Archive -Path "$workingDirectory\Autoruns.zip" -DestinationPath "$workingDirectory\Autoruns"
-        $checker = $true
-        Write-Host "yuh"
-    }
-    catch {
-        Write-Host "Error extracting Autoruns64.exe"
+if(-Not (Test-Path "$workingDirectory\Autoruns")) {
+    while ($checker -eq $false) {
+        try {
+            Expand-Archive -Path "$workingDirectory\Autoruns.zip" -DestinationPath "$workingDirectory\Autoruns"
+            $checker = $true
+        }
+        catch {
+            Write-Host "Error extracting Autoruns64.exe"
+        }
     }
 }
+
 $checker = $false
 while ($checker -eq $false) {
     try {
@@ -81,8 +84,11 @@ while ($checker -eq $false) {
         Write-Host "Error running Autoruns64.exe"
     }
 }
+
 Read-Host -Prompt "Loaded?"
 Get-ScreenCapture -Wait 0 -FileType "AutoRuns"
 Read-Host -Prompt "Loaded?"
 Get-ScreenCapture -Wait 0 -FIleType "AutoRuns"
 invoke-expression 'cmd /c start powershell -Command { netstat; Read-Host }'
+
+explorer .
